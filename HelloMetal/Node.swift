@@ -18,6 +18,15 @@ class Node {
     let vertexBuffer: MTLBuffer
     var device: MTLDevice
     
+    var positionX: Float = 0.0
+    var positionY: Float = 0.0
+    var positionZ: Float = 0.0
+    
+    var rotationX: Float = 0.0
+    var rotationY: Float = 0.0
+    var rotationZ: Float = 0.0
+    var scale: Float     = 1.0
+    
     init(name: String, vertices: [Vertex], device: MTLDevice) {
         var vertexData = [Float]()
         for vertex in vertices {
@@ -50,5 +59,13 @@ class Node {
         
         commandBuffer.presentDrawable(drawable)
         commandBuffer.commit()
+    }
+    
+    func modelMatrix() -> Matrix4 {
+        let matrix = Matrix4()
+        matrix.translate(self.positionX, y: self.positionY, z: self.positionZ)
+        matrix.rotateAroundX(self.rotationX, y: self.rotationY, z: self.rotationZ)
+        matrix.scale(self.scale, y: self.scale, z: self.scale)
+        return matrix
     }
 }

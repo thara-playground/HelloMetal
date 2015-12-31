@@ -16,7 +16,7 @@ class ViewController: UIViewController {
     var device: MTLDevice! = nil
     var metalLayer: CAMetalLayer! = nil
     
-    var objectToDraw: Triangle!
+    var objectToDraw: Cube!
     
     var pipelineState: MTLRenderPipelineState! = nil
     var commandQueue: MTLCommandQueue! = nil
@@ -35,7 +35,7 @@ class ViewController: UIViewController {
         
         self.view.layer.addSublayer(self.metalLayer)
         
-        self.objectToDraw = Triangle(device: device)
+        self.objectToDraw = Cube(device: device)
         
         let defaultLibrary = self.device.newDefaultLibrary()
         let fragmentProgram = defaultLibrary!.newFunctionWithName("basic_fragment")
