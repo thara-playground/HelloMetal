@@ -57,6 +57,7 @@ class Node {
         let commandBuffer = commandQueue.commandBuffer()
         
         let renderEncoder = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)
+        renderEncoder.setCullMode(.Front)
         renderEncoder.setRenderPipelineState(pipelineState)
         renderEncoder.setVertexBuffer(self.vertexBuffer, offset: 0, atIndex: 0)
         
