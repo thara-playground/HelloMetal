@@ -22,9 +22,14 @@ class ViewController: UIViewController {
     var commandQueue: MTLCommandQueue! = nil
     
     var timer: CADisplayLink! = nil
+    
+    var projectionMatrix: Matrix4!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.projectionMatrix = Matrix4.makePerspectiveViewAngle(Matrix4.degreesToRad(85.0), aspectRatio: Float(self.view.bounds.size.width / self.view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
+        
         self.device = MTLCreateSystemDefaultDevice()
         
         self.metalLayer = CAMetalLayer()
@@ -36,6 +41,11 @@ class ViewController: UIViewController {
         self.view.layer.addSublayer(self.metalLayer)
         
         self.objectToDraw = Cube(device: device)
+        self.objectToDraw.positionX =  0.0
+        self.objectToDraw.positionY =  0.0
+        self.objectToDraw.positionZ = -2.0
+        self.objectToDraw.rotationZ = Matrix4.degreesToRad(45)
+        self.objectToDraw.scale = 0.5
         
         let defaultLibrary = self.device.newDefaultLibrary()
         let fragmentProgram = defaultLibrary!.newFunctionWithName("basic_fragment")
@@ -62,7 +72,7 @@ class ViewController: UIViewController {
     
     func render() {
         let drawable = metalLayer.nextDrawable()!
-        self.objectToDraw.render(self.commandQueue, pipelineState: self.pipelineState, drawable: drawable, clearColor: nil)
+        self.objectToDraw.render(self.commandQueue, pipelineState: self.pipelineState, drawable: drawable, projectionMatrix: self.projectionMatrix, clearColor: nil)
     }
     
     func gameloop() {
