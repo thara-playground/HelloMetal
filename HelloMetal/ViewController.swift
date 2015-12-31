@@ -24,6 +24,8 @@ class ViewController: UIViewController {
     var timer: CADisplayLink! = nil
     
     var projectionMatrix: Matrix4!
+    
+    var lastFrameTimestamp: CFTimeInterval = 0.0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,11 +43,6 @@ class ViewController: UIViewController {
         self.view.layer.addSublayer(self.metalLayer)
         
         self.objectToDraw = Cube(device: device)
-        self.objectToDraw.positionX =  0.0
-        self.objectToDraw.positionY =  0.0
-        self.objectToDraw.positionZ = -2.0
-        self.objectToDraw.rotationZ = Matrix4.degreesToRad(45)
-        self.objectToDraw.scale = 0.5
         
         let defaultLibrary = self.device.newDefaultLibrary()
         let fragmentProgram = defaultLibrary!.newFunctionWithName("basic_fragment")
@@ -66,16 +63,35 @@ class ViewController: UIViewController {
         self.commandQueue = self.device.newCommandQueue()
         
         
-        self.timer = CADisplayLink(target: self, selector: Selector("gameloop"))
+        self.timer = CADisplayLink(target: self, selector: Selector("newFrame:"))
         self.timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }
     
     func render() {
         let drawable = metalLayer.nextDrawable()!
-        self.objectToDraw.render(self.commandQueue, pipelineState: self.pipelineState, drawable: drawable, projectionMatrix: self.projectionMatrix, clearColor: nil)
+        
+        let worldModelMatrix = Matrix4()
+        worldModelMatrix.translate(0.0, y: 0.0, z: -7.0)
+        worldModelMatrix.rotateAroundX(Matrix4.degreesToRad(25), y: 0.0, z: 0.0)
+        
+        self.objectToDraw.render(self.commandQueue, pipelineState: self.pipelineState, drawable: drawable, parentModelViewMatrix: worldModelMatrix, projectionMatrix: self.projectionMatrix, clearColor: nil)
     }
     
-    func gameloop() {
+    func newFrame(displayLink: CADisplayLink) {
+        if self.lastFrameTimestamp == 0.0 {
+            self.lastFrameTimestamp = displayLink.timestamp
+        }
+        
+        let elapsed: CFTimeInterval = displayLink.timestamp - self.lastFrameTimestamp
+        self.lastFrameTimestamp = displayLink.timestamp
+        
+        self.gameloop(timeSinceLastUpdate: elapsed)
+    }
+    
+    func gameloop(timeSinceLastUpdate timeSinceLastUpdate: CFTimeInterval) {
+        
+        self.objectToDraw.updateWithDelta(timeSinceLastUpdate)
+        
         autoreleasepool {
             self.render()
         }
