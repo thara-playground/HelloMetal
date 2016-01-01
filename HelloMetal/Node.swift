@@ -17,7 +17,6 @@ class Node {
     let vertexCount: Int
     
     let vertexBuffer: MTLBuffer
-    var uniformBuffer: MTLBuffer?
     
     var device: MTLDevice
     
@@ -32,6 +31,8 @@ class Node {
     
     var time:CFTimeInterval = 0.0
     
+    var bufferProvider: BufferProvider
+    
     init(name: String, vertices: [Vertex], device: MTLDevice) {
         var vertexData = [Float]()
         for vertex in vertices {
@@ -44,6 +45,8 @@ class Node {
         self.name = name
         self.device = device
         self.vertexCount = vertices.count
+        
+        self.bufferProvider = BufferProvider(device: device, inflightBuffersCount: 3, sizeOfUniformsBuffer: sizeof(Float) * Matrix4.numberOfElements() * 2)
     }
     
     func render(commandQueue: MTLCommandQueue, pipelineState: MTLRenderPipelineState, drawable: CAMetalDrawable, parentModelViewMatrix: Matrix4, projectionMatrix: Matrix4, clearColor: MTLClearColor?) {
@@ -64,12 +67,9 @@ class Node {
         let nodeModelMatrix = self.modelMatrix()
         nodeModelMatrix.multiplyLeft(parentModelViewMatrix)
         
-        self.uniformBuffer = self.device.newBufferWithLength(sizeof(Float) * Matrix4.numberOfElements() * 2, options: .CPUCacheModeDefaultCache)
-        let bufferPointer = self.uniformBuffer?.contents()
-        memcpy(bufferPointer!, nodeModelMatrix.raw(), sizeof(Float) * Matrix4.numberOfElements())
-        memcpy(bufferPointer! + sizeof(Float) * Matrix4.numberOfElements(), projectionMatrix.raw(), sizeof(Float) * Matrix4.numberOfElements())
+        let uniformBuffer = self.bufferProvider.nextUniformsBuffer(projectionMatrix, modelViewMatrix: nodeModelMatrix)
         
-        renderEncoder.setVertexBuffer(self.uniformBuffer, offset: 0, atIndex: 1)
+        renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, atIndex: 1)
         renderEncoder.drawPrimitives(.Triangle, vertexStart: 0, vertexCount: self.vertexCount, instanceCount: self.vertexCount / 3)
         renderEncoder.endEncoding()
         

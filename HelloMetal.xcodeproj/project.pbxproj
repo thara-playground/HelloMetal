@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7B04B57E1C3670290001E035 /* MetalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B04B57D1C3670290001E035 /* MetalViewController.swift */; };
+		7B04B5801C3679680001E035 /* BufferProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B04B57F1C3679680001E035 /* BufferProvider.swift */; };
 		7BD623031C32ED2F00BDD1A5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD623021C32ED2F00BDD1A5 /* AppDelegate.swift */; };
 		7BD623051C32ED2F00BDD1A5 /* MySceneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD623041C32ED2F00BDD1A5 /* MySceneViewController.swift */; };
 		7BD623081C32ED2F00BDD1A5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7BD623061C32ED2F00BDD1A5 /* Main.storyboard */; };
@@ -23,6 +24,7 @@
 
 /* Begin PBXFileReference section */
 		7B04B57D1C3670290001E035 /* MetalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalViewController.swift; sourceTree = "<group>"; };
+		7B04B57F1C3679680001E035 /* BufferProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BufferProvider.swift; sourceTree = "<group>"; };
 		7BD622FF1C32ED2F00BDD1A5 /* HelloMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7BD623021C32ED2F00BDD1A5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7BD623041C32ED2F00BDD1A5 /* MySceneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MySceneViewController.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 				7BD6231C1C345AC700BDD1A5 /* Node.swift */,
 				7BD6231E1C34FC1400BDD1A5 /* Triangle.swift */,
 				7BD623201C350D2B00BDD1A5 /* Cube.swift */,
+				7B04B57F1C3679680001E035 /* BufferProvider.swift */,
 			);
 			path = HelloMetal;
 			sourceTree = "<group>";
@@ -169,6 +172,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7B04B5801C3679680001E035 /* BufferProvider.swift in Sources */,
 				7BD623151C32F3CF00BDD1A5 /* Shaders.metal in Sources */,
 				7BD623051C32ED2F00BDD1A5 /* MySceneViewController.swift in Sources */,
 				7BD6231D1C345AC700BDD1A5 /* Node.swift in Sources */,
