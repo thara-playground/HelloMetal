@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7B04B57E1C3670290001E035 /* MetalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B04B57D1C3670290001E035 /* MetalViewController.swift */; };
 		7BD623031C32ED2F00BDD1A5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD623021C32ED2F00BDD1A5 /* AppDelegate.swift */; };
-		7BD623051C32ED2F00BDD1A5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD623041C32ED2F00BDD1A5 /* ViewController.swift */; };
+		7BD623051C32ED2F00BDD1A5 /* MySceneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD623041C32ED2F00BDD1A5 /* MySceneViewController.swift */; };
 		7BD623081C32ED2F00BDD1A5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7BD623061C32ED2F00BDD1A5 /* Main.storyboard */; };
 		7BD6230A1C32ED3000BDD1A5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BD623091C32ED3000BDD1A5 /* Assets.xcassets */; };
 		7BD6230D1C32ED3000BDD1A5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7BD6230B1C32ED3000BDD1A5 /* LaunchScreen.storyboard */; };
@@ -21,9 +22,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7B04B57D1C3670290001E035 /* MetalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalViewController.swift; sourceTree = "<group>"; };
 		7BD622FF1C32ED2F00BDD1A5 /* HelloMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7BD623021C32ED2F00BDD1A5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		7BD623041C32ED2F00BDD1A5 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		7BD623041C32ED2F00BDD1A5 /* MySceneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MySceneViewController.swift; sourceTree = "<group>"; };
 		7BD623071C32ED2F00BDD1A5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		7BD623091C32ED3000BDD1A5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7BD6230C1C32ED3000BDD1A5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -70,7 +72,8 @@
 			children = (
 				7BD623221C35207400BDD1A5 /* Matrix4 */,
 				7BD623021C32ED2F00BDD1A5 /* AppDelegate.swift */,
-				7BD623041C32ED2F00BDD1A5 /* ViewController.swift */,
+				7B04B57D1C3670290001E035 /* MetalViewController.swift */,
+				7BD623041C32ED2F00BDD1A5 /* MySceneViewController.swift */,
 				7BD623061C32ED2F00BDD1A5 /* Main.storyboard */,
 				7BD623091C32ED3000BDD1A5 /* Assets.xcassets */,
 				7BD6230B1C32ED3000BDD1A5 /* LaunchScreen.storyboard */,
@@ -167,13 +170,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				7BD623151C32F3CF00BDD1A5 /* Shaders.metal in Sources */,
-				7BD623051C32ED2F00BDD1A5 /* ViewController.swift in Sources */,
+				7BD623051C32ED2F00BDD1A5 /* MySceneViewController.swift in Sources */,
 				7BD6231D1C345AC700BDD1A5 /* Node.swift in Sources */,
 				7BD623211C350D2B00BDD1A5 /* Cube.swift in Sources */,
 				7BD6231B1C345A2B00BDD1A5 /* Vertex.swift in Sources */,
 				7BD6232A1C35217A00BDD1A5 /* Matrix4.m in Sources */,
 				7BD6231F1C34FC1400BDD1A5 /* Triangle.swift in Sources */,
 				7BD623031C32ED2F00BDD1A5 /* AppDelegate.swift in Sources */,
+				7B04B57E1C3670290001E035 /* MetalViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,6 +338,7 @@
 				7BD623131C32ED3000BDD1A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
