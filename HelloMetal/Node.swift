@@ -51,6 +51,8 @@ class Node {
     
     func render(commandQueue: MTLCommandQueue, pipelineState: MTLRenderPipelineState, drawable: CAMetalDrawable, parentModelViewMatrix: Matrix4, projectionMatrix: Matrix4, clearColor: MTLClearColor?) {
         
+        dispatch_semaphore_wait(self.bufferProvider.avaliableResourcesSemaphore, DISPATCH_TIME_FOREVER)
+        
         let renderPassDescriptor = MTLRenderPassDescriptor()
         renderPassDescriptor.colorAttachments[0].texture = drawable.texture
         renderPassDescriptor.colorAttachments[0].loadAction = .Clear
@@ -58,6 +60,9 @@ class Node {
         renderPassDescriptor.colorAttachments[0].storeAction = .Store
         
         let commandBuffer = commandQueue.commandBuffer()
+        commandBuffer.addCompletedHandler { (commandBuffer) -> Void in
+            let _ = dispatch_semaphore_signal(self.bufferProvider.avaliableResourcesSemaphore)
+        }
         
         let renderEncoder = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)
         renderEncoder.setCullMode(.Front)
