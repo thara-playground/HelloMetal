@@ -16,6 +16,9 @@ class MySceneViewController: MetalViewController, MetalViewControllerDelegate {
     var worldModelMatrix: Matrix4!
     var objectToDraw: Cube!
     
+    let panSensivity: Float = 5.0
+    var lastPanLocation: CGPoint!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -25,6 +28,8 @@ class MySceneViewController: MetalViewController, MetalViewControllerDelegate {
         
         self.objectToDraw = Cube(device: device, commandQueue: self.commandQueue)
         self.metalViewControllerDelegate = self
+        
+        self.setupGestures()
     }
 }
 
@@ -39,4 +44,28 @@ extension MySceneViewController {
     func updateLogic(timeSinceLastUpdate: CFTimeInterval) {
         self.objectToDraw.updateWithDelta(timeSinceLastUpdate)
     }
+}
+
+//MARK: - Gesture related
+extension MySceneViewController {
+    
+    func setupGestures() {
+        let pan = UIPanGestureRecognizer(target: self, action: Selector("pan:"))
+        self.view.addGestureRecognizer(pan)
+    }
+    
+    func pan(panGesture: UIPanGestureRecognizer) {
+        if panGesture.state == .Changed {
+            let pointInView = panGesture.locationInView(self.view)
+            let xDelta = Float((self.lastPanLocation.x - pointInView.x) / self.view.bounds.width) * self.panSensivity
+            let yDelta = Float((self.lastPanLocation.y - pointInView.y) / self.view.bounds.height) * self.panSensivity
+            
+            self.objectToDraw.rotationY -= xDelta
+            self.objectToDraw.rotationX -= yDelta
+            self.lastPanLocation = pointInView
+        } else if panGesture.state == .Began {
+            self.lastPanLocation = panGesture.locationInView(self.view)
+        }
+    }
+
 }
