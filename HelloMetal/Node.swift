@@ -33,7 +33,10 @@ class Node {
     
     var bufferProvider: BufferProvider
     
-    init(name: String, vertices: [Vertex], device: MTLDevice) {
+    var texture: MTLTexture
+    lazy var samplerState: MTLSamplerState? = Node.defaultSampler(self.device)
+    
+    init(name: String, vertices: [Vertex], device: MTLDevice, texture: MTLTexture) {
         var vertexData = [Float]()
         for vertex in vertices {
             vertexData += vertex.floatBuffer()
@@ -45,6 +48,7 @@ class Node {
         self.name = name
         self.device = device
         self.vertexCount = vertices.count
+        self.texture = texture
         
         self.bufferProvider = BufferProvider(device: device, inflightBuffersCount: 3, sizeOfUniformsBuffer: sizeof(Float) * Matrix4.numberOfElements() * 2)
     }
@@ -68,6 +72,10 @@ class Node {
         renderEncoder.setCullMode(.Front)
         renderEncoder.setRenderPipelineState(pipelineState)
         renderEncoder.setVertexBuffer(self.vertexBuffer, offset: 0, atIndex: 0)
+        renderEncoder.setFragmentTexture(self.texture, atIndex: 0)
+        if let samplerState = self.samplerState {
+            renderEncoder.setFragmentSamplerState(samplerState, atIndex: 0)
+        }
         
         let nodeModelMatrix = self.modelMatrix()
         nodeModelMatrix.multiplyLeft(parentModelViewMatrix)
@@ -92,5 +100,27 @@ class Node {
     
     func updateWithDelta(delta: CFTimeInterval) {
         self.time += delta
+    }
+    
+    class func defaultSampler(device: MTLDevice) -> MTLSamplerState {
+        
+        let samplerDescriptor: MTLSamplerDescriptor? = MTLSamplerDescriptor()
+        
+        if let sampler = samplerDescriptor {
+            sampler.minFilter = .Nearest
+            sampler.magFilter = .Nearest
+            sampler.mipFilter = .Nearest
+            sampler.maxAnisotropy = 1
+            sampler.sAddressMode = .ClampToEdge
+            sampler.tAddressMode = .ClampToEdge
+            sampler.rAddressMode = .ClampToEdge
+            sampler.normalizedCoordinates = true
+            sampler.lodMaxClamp = 0
+            sampler.lodMaxClamp = FLT_MAX
+        } else {
+            print(">> ERROR: Failed creating a sampler descriptor!")
+        }
+        
+        return device.newSamplerStateWithDescriptor(samplerDescriptor!)
     }
 }

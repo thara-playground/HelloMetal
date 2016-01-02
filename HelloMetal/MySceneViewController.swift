@@ -23,7 +23,7 @@ class MySceneViewController: MetalViewController, MetalViewControllerDelegate {
         self.worldModelMatrix.translate(0.0, y: 0.0, z: -4)
         self.worldModelMatrix.rotateAroundX(Matrix4.degreesToRad(25), y: 0.0, z: 0.0)
         
-        self.objectToDraw = Cube(device: device)
+        self.objectToDraw = Cube(device: device, commandQueue: self.commandQueue)
         self.metalViewControllerDelegate = self
     }
 }

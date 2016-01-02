@@ -10,10 +10,11 @@ import Foundation
 
 struct Vertex {
     
-    var x,y,z: Float
-    var r,g,b,a: Float
+    var x,y,z: Float    // position data
+    var r,g,b,a: Float  // color data
+    var s,t: Float      // texture coordinates
     
     func floatBuffer() -> [Float] {
-        return [self.x, self.y, self.z, self.r, self.g, self.b, self.a]
+        return [self.x, self.y, self.z, self.r, self.g, self.b, self.a, self.s, self.t]
     }
 }
