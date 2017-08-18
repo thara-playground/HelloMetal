@@ -16,17 +16,17 @@ class BufferProvider: NSObject {
     private var uniformsBuffers: [MTLBuffer]
     private var avaliableBufferIndex: Int = 0
     
-    var avaliableResourcesSemaphore: dispatch_semaphore_t
+    var avaliableResourcesSemaphore: DispatchSemaphore
     
     init(device: MTLDevice, inflightBuffersCount: Int, sizeOfUniformsBuffer: Int) {
         
-        self.avaliableResourcesSemaphore = dispatch_semaphore_create(inflightBuffersCount)
+        self.avaliableResourcesSemaphore = DispatchSemaphore(value: inflightBuffersCount)
         
         self.inflightBuffersCount = inflightBuffersCount
         self.uniformsBuffers = [MTLBuffer]()
         
         for _ in 0...self.inflightBuffersCount - 1 {
-            let uniformsBuffer = device.newBufferWithLength(sizeOfUniformsBuffer, options: .CPUCacheModeDefaultCache)
+            let uniformsBuffer = device.makeBuffer(length: sizeOfUniformsBuffer, options: [])
             uniformsBuffers.append(uniformsBuffer)
         }
     }
@@ -35,10 +35,10 @@ class BufferProvider: NSObject {
         let buffer = self.uniformsBuffers[self.avaliableBufferIndex]
         let bufferPointer = buffer.contents()
         
-        memcpy(bufferPointer, modelViewMatrix.raw(), sizeof(Float) * Matrix4.numberOfElements())
-        memcpy(bufferPointer + sizeof(Float) * Matrix4.numberOfElements(), projectionMatrix.raw(), sizeof(Float) * Matrix4.numberOfElements())
+        memcpy(bufferPointer, modelViewMatrix.raw(), MemoryLayout<Float>.size * Matrix4.numberOfElements())
+        memcpy(bufferPointer + MemoryLayout<Float>.size * Matrix4.numberOfElements(), projectionMatrix.raw(), MemoryLayout<Float>.size * Matrix4.numberOfElements())
         
-        self.avaliableBufferIndex++
+        self.avaliableBufferIndex += 1
         if avaliableBufferIndex == self.inflightBuffersCount {
             self.avaliableBufferIndex = 0
         }
@@ -47,7 +47,7 @@ class BufferProvider: NSObject {
     
     deinit {
         for _ in 0...self.inflightBuffersCount {
-            dispatch_semaphore_signal(self.avaliableResourcesSemaphore)
+            self.avaliableResourcesSemaphore.signal()
         }
     }
 }

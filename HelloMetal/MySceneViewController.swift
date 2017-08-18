@@ -24,7 +24,7 @@ class MySceneViewController: MetalViewController, MetalViewControllerDelegate {
         
         self.worldModelMatrix = Matrix4()
         self.worldModelMatrix.translate(0.0, y: 0.0, z: -4)
-        self.worldModelMatrix.rotateAroundX(Matrix4.degreesToRad(25), y: 0.0, z: 0.0)
+        self.worldModelMatrix.rotateAroundX(Matrix4.degrees(toRad: 25), y: 0.0, z: 0.0)
         
         self.objectToDraw = Cube(device: device, commandQueue: self.commandQueue)
         self.metalViewControllerDelegate = self
@@ -50,21 +50,21 @@ extension MySceneViewController {
 extension MySceneViewController {
     
     func setupGestures() {
-        let pan = UIPanGestureRecognizer(target: self, action: Selector("pan:"))
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(MySceneViewController.pan(panGesture:)))
         self.view.addGestureRecognizer(pan)
     }
     
     func pan(panGesture: UIPanGestureRecognizer) {
-        if panGesture.state == .Changed {
-            let pointInView = panGesture.locationInView(self.view)
+        if panGesture.state == .changed {
+            let pointInView = panGesture.location(in: self.view)
             let xDelta = Float((self.lastPanLocation.x - pointInView.x) / self.view.bounds.width) * self.panSensivity
             let yDelta = Float((self.lastPanLocation.y - pointInView.y) / self.view.bounds.height) * self.panSensivity
             
             self.objectToDraw.rotationY -= xDelta
             self.objectToDraw.rotationX -= yDelta
             self.lastPanLocation = pointInView
-        } else if panGesture.state == .Began {
-            self.lastPanLocation = panGesture.locationInView(self.view)
+        } else if panGesture.state == .began {
+            self.lastPanLocation = panGesture.location(in: self.view)
         }
     }
 

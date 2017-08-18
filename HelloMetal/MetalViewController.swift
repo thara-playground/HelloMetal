@@ -32,38 +32,38 @@ class MetalViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.projectionMatrix = Matrix4.makePerspectiveViewAngle(Matrix4.degreesToRad(85.0), aspectRatio: Float(self.view.bounds.size.width / self.view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
+        self.projectionMatrix = Matrix4.makePerspectiveViewAngle(Matrix4.degrees(toRad: 85.0), aspectRatio: Float(self.view.bounds.size.width / self.view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
         
         self.device = MTLCreateSystemDefaultDevice()
         
         self.metalLayer = CAMetalLayer()
         self.metalLayer.device = device
-        self.metalLayer.pixelFormat = .BGRA8Unorm
+        self.metalLayer.pixelFormat = .bgra8Unorm
         self.metalLayer.framebufferOnly = true
         self.view.layer.addSublayer(self.metalLayer)
         
-        self.commandQueue = device.newCommandQueue()
+        self.commandQueue = device.makeCommandQueue()
         
         let defaultLibrary = self.device.newDefaultLibrary()
-        let fragmentProgram = defaultLibrary!.newFunctionWithName("basic_fragment")
-        let vertexProgram = defaultLibrary!.newFunctionWithName("basic_vertex")
+        let fragmentProgram = defaultLibrary!.makeFunction(name: "basic_fragment")
+        let vertexProgram = defaultLibrary!.makeFunction(name: "basic_vertex")
         
         let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
         pipelineStateDescriptor.vertexFunction = vertexProgram
         pipelineStateDescriptor.fragmentFunction = fragmentProgram
-        pipelineStateDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
-        pipelineStateDescriptor.colorAttachments[0].blendingEnabled = true
-        pipelineStateDescriptor.colorAttachments[0].rgbBlendOperation = .Add;
-        pipelineStateDescriptor.colorAttachments[0].alphaBlendOperation = .Add;
-        pipelineStateDescriptor.colorAttachments[0].sourceRGBBlendFactor = .One;
-        pipelineStateDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .One;
-        pipelineStateDescriptor.colorAttachments[0].destinationRGBBlendFactor = .OneMinusSourceAlpha;
-        pipelineStateDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .OneMinusSourceAlpha;
+        pipelineStateDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
+        pipelineStateDescriptor.colorAttachments[0].isBlendingEnabled = true
+        pipelineStateDescriptor.colorAttachments[0].rgbBlendOperation = .add;
+        pipelineStateDescriptor.colorAttachments[0].alphaBlendOperation = .add;
+        pipelineStateDescriptor.colorAttachments[0].sourceRGBBlendFactor = .one;
+        pipelineStateDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .one;
+        pipelineStateDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha;
+        pipelineStateDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha;
 
-        self.pipelineState = try! self.device.newRenderPipelineStateWithDescriptor(pipelineStateDescriptor)
+        self.pipelineState = try! self.device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
         
-        self.timer = CADisplayLink(target: self, selector: Selector("newFrame:"))
-        self.timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+        self.timer = CADisplayLink(target: self, selector: #selector(MetalViewController.newFrame(_:)))
+        self.timer.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
     }
     
     override func viewDidLayoutSubviews() {
@@ -77,16 +77,16 @@ class MetalViewController: UIViewController {
             self.metalLayer.frame = CGRect(x: 0, y: 0, width: layerSize.width, height: layerSize.height)
             self.metalLayer.drawableSize = CGSize(width: layerSize.width * scale, height: layerSize.height * scale)
         }
-        self.projectionMatrix = Matrix4.makePerspectiveViewAngle(Matrix4.degreesToRad(85.0), aspectRatio: Float(self.view.bounds.size.width / self.view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
+        self.projectionMatrix = Matrix4.makePerspectiveViewAngle(Matrix4.degrees(toRad: 85.0), aspectRatio: Float(self.view.bounds.size.width / self.view.bounds.size.height), nearZ: 0.01, farZ: 100.0)
     }
     
     func render() {
         if let drawable = metalLayer.nextDrawable() {
-            self.metalViewControllerDelegate?.renderObjects(drawable)
+            self.metalViewControllerDelegate?.renderObjects(drawable: drawable)
         }
     }
     
-    func newFrame(displayLink: CADisplayLink) {
+    func newFrame(_ displayLink: CADisplayLink) {
         if self.lastFrameTimestamp == 0.0 {
             self.lastFrameTimestamp = displayLink.timestamp
         }
@@ -97,9 +97,9 @@ class MetalViewController: UIViewController {
         self.gameloop(timeSinceLastUpdate: elapsed)
     }
     
-    func gameloop(timeSinceLastUpdate timeSinceLastUpdate: CFTimeInterval) {
+    func gameloop(timeSinceLastUpdate: CFTimeInterval) {
         
-        self.metalViewControllerDelegate?.updateLogic(timeSinceLastUpdate)
+        self.metalViewControllerDelegate?.updateLogic(timeSinceLastUpdate: timeSinceLastUpdate)
         
         autoreleasepool {
             self.render()

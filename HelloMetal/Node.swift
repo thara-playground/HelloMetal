@@ -34,7 +34,7 @@ class Node {
     var bufferProvider: BufferProvider
     
     var texture: MTLTexture
-    lazy var samplerState: MTLSamplerState? = Node.defaultSampler(self.device)
+    lazy var samplerState: MTLSamplerState? = Node.defaultSampler(device: self.device)
     
     init(name: String, vertices: [Vertex], device: MTLDevice, texture: MTLTexture) {
         var vertexData = [Float]()
@@ -42,63 +42,63 @@ class Node {
             vertexData += vertex.floatBuffer()
         }
         
-        let dataSize = vertexData.count * sizeofValue(vertexData[0])
-        self.vertexBuffer = device.newBufferWithBytes(vertexData, length: dataSize, options: .CPUCacheModeDefaultCache)
+        let dataSize = vertexData.count * MemoryLayout.size(ofValue: vertexData[0])
+        self.vertexBuffer = device.makeBuffer(bytes: vertexData, length: dataSize, options: MTLResourceOptions())
         
         self.name = name
         self.device = device
         self.vertexCount = vertices.count
         self.texture = texture
         
-        self.bufferProvider = BufferProvider(device: device, inflightBuffersCount: 3, sizeOfUniformsBuffer: sizeof(Float) * Matrix4.numberOfElements() * 2)
+        self.bufferProvider = BufferProvider(device: device, inflightBuffersCount: 3, sizeOfUniformsBuffer: MemoryLayout<Float>.size * Matrix4.numberOfElements() * 2)
     }
     
-    func render(commandQueue: MTLCommandQueue, pipelineState: MTLRenderPipelineState, drawable: CAMetalDrawable, parentModelViewMatrix: Matrix4, projectionMatrix: Matrix4, clearColor: MTLClearColor?) {
+    func render(_ commandQueue: MTLCommandQueue, pipelineState: MTLRenderPipelineState, drawable: CAMetalDrawable, parentModelViewMatrix: Matrix4, projectionMatrix: Matrix4, clearColor: MTLClearColor?) {
         
-        dispatch_semaphore_wait(self.bufferProvider.avaliableResourcesSemaphore, DISPATCH_TIME_FOREVER)
+        self.bufferProvider.avaliableResourcesSemaphore.wait(timeout: DispatchTime.distantFuture)
         
         let renderPassDescriptor = MTLRenderPassDescriptor()
         renderPassDescriptor.colorAttachments[0].texture = drawable.texture
-        renderPassDescriptor.colorAttachments[0].loadAction = .Clear
+        renderPassDescriptor.colorAttachments[0].loadAction = .clear
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0.0, green: 104.0/255.0, blue: 5.0/255, alpha: 1.0)
-        renderPassDescriptor.colorAttachments[0].storeAction = .Store
+        renderPassDescriptor.colorAttachments[0].storeAction = .store
         
-        let commandBuffer = commandQueue.commandBuffer()
+        let commandBuffer = commandQueue.makeCommandBuffer()
         commandBuffer.addCompletedHandler { (commandBuffer) -> Void in
-            let _ = dispatch_semaphore_signal(self.bufferProvider.avaliableResourcesSemaphore)
+            let _ = self.bufferProvider.avaliableResourcesSemaphore.signal()
         }
         
-        let renderEncoder = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)
-        renderEncoder.setCullMode(.Front)
+        let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+        renderEncoder.setCullMode(.front)
         renderEncoder.setRenderPipelineState(pipelineState)
-        renderEncoder.setVertexBuffer(self.vertexBuffer, offset: 0, atIndex: 0)
-        renderEncoder.setFragmentTexture(self.texture, atIndex: 0)
+        renderEncoder.setVertexBuffer(self.vertexBuffer, offset: 0, at: 0)
+        renderEncoder.setFragmentTexture(self.texture, at: 0)
         if let samplerState = self.samplerState {
-            renderEncoder.setFragmentSamplerState(samplerState, atIndex: 0)
+            renderEncoder.setFragmentSamplerState(samplerState, at: 0)
         }
         
         let nodeModelMatrix = self.modelMatrix()
         nodeModelMatrix.multiplyLeft(parentModelViewMatrix)
         
-        let uniformBuffer = self.bufferProvider.nextUniformsBuffer(projectionMatrix, modelViewMatrix: nodeModelMatrix)
+        let uniformBuffer = self.bufferProvider.nextUniformsBuffer(projectionMatrix: projectionMatrix, modelViewMatrix: nodeModelMatrix)
         
-        renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, atIndex: 1)
-        renderEncoder.drawPrimitives(.Triangle, vertexStart: 0, vertexCount: self.vertexCount, instanceCount: self.vertexCount / 3)
+        renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, at: 1)
+        renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: self.vertexCount, instanceCount: self.vertexCount / 3)
         renderEncoder.endEncoding()
         
-        commandBuffer.presentDrawable(drawable)
+        commandBuffer.present(drawable)
         commandBuffer.commit()
     }
     
     func modelMatrix() -> Matrix4 {
         let matrix = Matrix4()
-        matrix.translate(self.positionX, y: self.positionY, z: self.positionZ)
-        matrix.rotateAroundX(self.rotationX, y: self.rotationY, z: self.rotationZ)
-        matrix.scale(self.scale, y: self.scale, z: self.scale)
-        return matrix
+        matrix?.translate(self.positionX, y: self.positionY, z: self.positionZ)
+        matrix?.rotateAroundX(self.rotationX, y: self.rotationY, z: self.rotationZ)
+        matrix?.scale(self.scale, y: self.scale, z: self.scale)
+        return matrix!
     }
     
-    func updateWithDelta(delta: CFTimeInterval) {
+    func updateWithDelta(_ delta: CFTimeInterval) {
         self.time += delta
     }
     
@@ -107,20 +107,20 @@ class Node {
         let samplerDescriptor: MTLSamplerDescriptor? = MTLSamplerDescriptor()
         
         if let sampler = samplerDescriptor {
-            sampler.minFilter = .Nearest
-            sampler.magFilter = .Nearest
-            sampler.mipFilter = .Nearest
+            sampler.minFilter = .nearest
+            sampler.magFilter = .nearest
+            sampler.mipFilter = .nearest
             sampler.maxAnisotropy = 1
-            sampler.sAddressMode = .ClampToEdge
-            sampler.tAddressMode = .ClampToEdge
-            sampler.rAddressMode = .ClampToEdge
+            sampler.sAddressMode = .clampToEdge
+            sampler.tAddressMode = .clampToEdge
+            sampler.rAddressMode = .clampToEdge
             sampler.normalizedCoordinates = true
             sampler.lodMaxClamp = 0
-            sampler.lodMaxClamp = FLT_MAX
+            sampler.lodMaxClamp = Float.greatestFiniteMagnitude
         } else {
             print(">> ERROR: Failed creating a sampler descriptor!")
         }
         
-        return device.newSamplerStateWithDescriptor(samplerDescriptor!)
+        return device.makeSamplerState(descriptor: samplerDescriptor!)
     }
 }
