@@ -87,8 +87,8 @@ class MetalTexture: NSObject {
         let region = MTLRegionMake2D(0, 0, Int(source.width), Int(source.height))
         let pixelsData = malloc(source.width * source.height * 4)
         source.getBytes(pixelsData!, bytesPerRow: Int(source.width) * 4, from: region, mipmapLevel: 0)
-        copyTexture.replace(region: region, mipmapLevel: 0, withBytes: pixelsData!, bytesPerRow: Int(source.width) * 4)
-        return copyTexture
+        copyTexture?.replace(region: region, mipmapLevel: 0, withBytes: pixelsData!, bytesPerRow: Int(source.width) * 4)
+        return copyTexture!
     }
     
     class func copyMipLayer(source: MTLTexture, destination:MTLTexture, mipLvl: Int){
@@ -146,14 +146,14 @@ class MetalTexture: NSObject {
         
         let commandBuffer = commandQ.makeCommandBuffer()
         
-        commandBuffer.addCompletedHandler(block)
+        commandBuffer?.addCompletedHandler(block)
         
-        let blitCommandEncoder = commandBuffer.makeBlitCommandEncoder()
+        let blitCommandEncoder = commandBuffer?.makeBlitCommandEncoder()
         
-        blitCommandEncoder.generateMipmaps(for: texture)
-        blitCommandEncoder.endEncoding()
+        blitCommandEncoder?.generateMipmaps(for: texture)
+        blitCommandEncoder?.endEncoding()
         
-        commandBuffer.commit()
+        commandBuffer?.commit()
     }
     
 }

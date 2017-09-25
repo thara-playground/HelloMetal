@@ -43,7 +43,7 @@ class Node {
         }
         
         let dataSize = vertexData.count * MemoryLayout.size(ofValue: vertexData[0])
-        self.vertexBuffer = device.makeBuffer(bytes: vertexData, length: dataSize, options: MTLResourceOptions())
+        self.vertexBuffer = device.makeBuffer(bytes: vertexData, length: dataSize, options: MTLResourceOptions())!
         
         self.name = name
         self.device = device
@@ -55,7 +55,7 @@ class Node {
     
     func render(_ commandQueue: MTLCommandQueue, pipelineState: MTLRenderPipelineState, drawable: CAMetalDrawable, parentModelViewMatrix: Matrix4, projectionMatrix: Matrix4, clearColor: MTLClearColor?) {
         
-        self.bufferProvider.avaliableResourcesSemaphore.wait(timeout: DispatchTime.distantFuture)
+        _ = self.bufferProvider.avaliableResourcesSemaphore.wait(timeout: DispatchTime.distantFuture)
         
         let renderPassDescriptor = MTLRenderPassDescriptor()
         renderPassDescriptor.colorAttachments[0].texture = drawable.texture
@@ -64,17 +64,17 @@ class Node {
         renderPassDescriptor.colorAttachments[0].storeAction = .store
         
         let commandBuffer = commandQueue.makeCommandBuffer()
-        commandBuffer.addCompletedHandler { (commandBuffer) -> Void in
+        commandBuffer?.addCompletedHandler { (commandBuffer) -> Void in
             let _ = self.bufferProvider.avaliableResourcesSemaphore.signal()
         }
         
-        let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
-        renderEncoder.setCullMode(.front)
-        renderEncoder.setRenderPipelineState(pipelineState)
-        renderEncoder.setVertexBuffer(self.vertexBuffer, offset: 0, at: 0)
-        renderEncoder.setFragmentTexture(self.texture, at: 0)
+        let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+        renderEncoder?.setCullMode(.front)
+        renderEncoder?.setRenderPipelineState(pipelineState)
+        renderEncoder?.setVertexBuffer(self.vertexBuffer, offset: 0, index: 0)
+        renderEncoder?.setFragmentTexture(self.texture, index: 0)
         if let samplerState = self.samplerState {
-            renderEncoder.setFragmentSamplerState(samplerState, at: 0)
+            renderEncoder?.setFragmentSamplerState(samplerState, index: 0)
         }
         
         let nodeModelMatrix = self.modelMatrix()
@@ -82,12 +82,12 @@ class Node {
         
         let uniformBuffer = self.bufferProvider.nextUniformsBuffer(projectionMatrix: projectionMatrix, modelViewMatrix: nodeModelMatrix)
         
-        renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, at: 1)
-        renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: self.vertexCount, instanceCount: self.vertexCount / 3)
-        renderEncoder.endEncoding()
+        renderEncoder?.setVertexBuffer(uniformBuffer, offset: 0, index: 1)
+        renderEncoder?.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: self.vertexCount, instanceCount: self.vertexCount / 3)
+        renderEncoder?.endEncoding()
         
-        commandBuffer.present(drawable)
-        commandBuffer.commit()
+        commandBuffer?.present(drawable)
+        commandBuffer?.commit()
     }
     
     func modelMatrix() -> Matrix4 {
@@ -121,6 +121,6 @@ class Node {
             print(">> ERROR: Failed creating a sampler descriptor!")
         }
         
-        return device.makeSamplerState(descriptor: samplerDescriptor!)
+        return device.makeSamplerState(descriptor: samplerDescriptor!)!
     }
 }

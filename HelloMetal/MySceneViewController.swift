@@ -54,7 +54,7 @@ extension MySceneViewController {
         self.view.addGestureRecognizer(pan)
     }
     
-    func pan(panGesture: UIPanGestureRecognizer) {
+    @objc func pan(panGesture: UIPanGestureRecognizer) {
         if panGesture.state == .changed {
             let pointInView = panGesture.location(in: self.view)
             let xDelta = Float((self.lastPanLocation.x - pointInView.x) / self.view.bounds.width) * self.panSensivity
